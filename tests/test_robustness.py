@@ -17,6 +17,43 @@ from test_lab import FakeProvider, final, tool_call
 
 
 class RobustnessTests(unittest.TestCase):
+    def test_normalized_call_cannot_change_native_name_or_arguments(self):
+        original = tool_call('same-id', 'get_status', '{"provider":"github"}')
+        for field, value in [('name', 'get_incident_details'),
+                             ('arguments', '{"provider":"cloudflare"}')]:
+            response = copy.deepcopy(original)
+            response['calls'][0][field] = value
+            tools = StatusTools()
+            with patch.object(tools, 'execute') as execute:
+                result = run_agent('Kiểm tra', FakeProvider([response]), tools)
+            self.assertEqual(result['status'], 'error')
+            self.assertEqual(result['trace'][-1]['error'], 'INVALID_MODEL_RESPONSE')
+            execute.assert_not_called()
+
+    def test_non_finite_json_arguments_are_rejected_before_execution(self):
+        for constant in ('NaN', 'Infinity', '-Infinity'):
+            response = tool_call('bad', 'get_status',
+                                 '{"provider":"github","component":' + constant + '}')
+            provider = FakeProvider([response, final('Không lấy được dữ liệu hợp lệ.')])
+            tools = StatusTools()
+            with patch.object(tools, 'execute') as execute:
+                result = run_agent('Kiểm tra', provider, tools)
+            self.assertEqual(result['status'], 'completed')
+            execute.assert_not_called()
+            self.assertEqual(json.loads(provider.histories[1][-1]['content'])['error'],
+                             'INVALID_ARGUMENTS')
+
+    def test_status_observation_exposes_scope_without_changing_tool_trace(self):
+        provider = FakeProvider([tool_call('a', 'get_status', '{"provider":"github"}'), final()])
+        result = run_agent('Kiểm tra tổng quan', provider, StatusTools())
+        raw = next(t['result'] for t in result['trace'] if t['event'] == 'tool')
+        received = json.loads(provider.histories[1][-1]['content'])
+        self.assertEqual(received['overall'], raw['overall'])
+        self.assertEqual(received['components'], [])
+        self.assertFalse(received['agent_evidence_scope']['all_components_checked'])
+        self.assertEqual(received['agent_evidence_scope']['components_returned'], 0)
+        self.assertNotIn('agent_evidence_scope', raw)
+
     def test_invalid_budget_is_traced_without_calling_provider(self):
         for budget in (0, -1, True, 1.5, '2'):
             with self.subTest(budget=budget):

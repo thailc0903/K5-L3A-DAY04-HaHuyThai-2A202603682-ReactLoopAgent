@@ -31,6 +31,20 @@ def tool_events(result):
 
 
 class BonusPolicyTests(unittest.TestCase):
+    def test_rate_limit_observation_preserves_original_query_for_retry(self):
+        tools = BonusTools(scenario='rate_limit_once')
+        arguments = {'component': 'Builds'}
+        provider = ScriptedProvider([call('a', 'get_vercel_status', arguments),
+                                     call('b', 'get_vercel_status', arguments), final()])
+        result = run_agent('Kiểm tra Builds', provider, tools)
+        self.assertEqual(result['status'], 'completed')
+        received = json.loads(provider.histories[1][-1]['content'])
+        retry_call = received['agent_retry']['retry_call']
+        self.assertEqual(retry_call, {'name': 'get_vercel_status', 'arguments': arguments})
+        events = tool_events(result)
+        self.assertEqual(events[1]['arguments'], retry_call['arguments'])
+        self.assertEqual(events[1]['result']['provider'], 'vercel')
+
     def test_core_tools_keep_original_schemas_and_prompt(self):
         provider = ScriptedProvider([final()])
         result = run_agent('Ngoài phạm vi', provider, StatusTools())

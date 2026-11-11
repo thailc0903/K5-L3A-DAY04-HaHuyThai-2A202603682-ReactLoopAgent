@@ -1,0 +1,345 @@
+{
+    "kind":  "token_based_estimate_with_separate_user_reported_usage",
+    "pricing_checked_on":  "2026-11-11",
+    "model":  "gpt-5.4-mini",
+    "currency":  "USD",
+    "pricing_source":  "https://developers.openai.com/api/docs/models/gpt-5.4-mini",
+    "usd_per_million_tokens":  {
+                                   "uncached_input":  0.75,
+                                   "cached_input":  0.075,
+                                   "output":  4.50
+                               },
+    "formula":  "((input_tokens-cached_input_tokens)*0.75+cached_input_tokens*0.075+output_tokens*4.50)/1000000",
+    "assumptions":  [
+                        "Standard synchronous text API pricing, no regional or account-specific adjustment.",
+                        "Cached tokens are included in input tokens; reasoning tokens are included in completion tokens.",
+                        "Only agent usage and judge_usage retained in these eleven unique runs are counted. Identical final and canonical copies count once.",
+                        "Excluded: other runs, overwritten or deleted runs, manual run.py calls, retries without recorded usage, account credits, taxes and discounts.",
+                        "Snapshot captured_at is the data timestamp, not the API request or billing time."
+                    ],
+    "runs":  [
+                 {
+                     "file":  "eval_before.json",
+                     "identical_copies_not_counted_again":  [
+
+                                                            ],
+                     "sha256":  "D0DD34C96680F606D94A910EE19F9E776981449915F53FEE5104CD87543F56BB",
+                     "case_count":  22,
+                     "agent":  {
+                                   "calls":  60,
+                                   "input_tokens":  53096,
+                                   "cached_input_tokens":  7424,
+                                   "uncached_input_tokens":  45672,
+                                   "output_tokens":  12569,
+                                   "total_tokens":  65665,
+                                   "estimated_usd":  0.0913713
+                               },
+                     "judge":  {
+                                   "calls":  22,
+                                   "input_tokens":  48234,
+                                   "cached_input_tokens":  0,
+                                   "uncached_input_tokens":  48234,
+                                   "output_tokens":  3093,
+                                   "total_tokens":  51327,
+                                   "estimated_usd":  0.050094
+                               },
+                     "estimated_total_usd":  0.1414653
+                 },
+                 {
+                     "file":  "artifacts/eval_after_cp5.json",
+                     "identical_copies_not_counted_again":  [
+
+                                                            ],
+                     "sha256":  "11829163C2477ACDEB4B7C91BF0F4D2FC316F4AECDD3E2E648FCF84D858DD6DE",
+                     "case_count":  22,
+                     "agent":  {
+                                   "calls":  55,
+                                   "input_tokens":  50631,
+                                   "cached_input_tokens":  2176,
+                                   "uncached_input_tokens":  48455,
+                                   "output_tokens":  11679,
+                                   "total_tokens":  62310,
+                                   "estimated_usd":  0.08905995
+                               },
+                     "judge":  {
+                                   "calls":  22,
+                                   "input_tokens":  41584,
+                                   "cached_input_tokens":  0,
+                                   "uncached_input_tokens":  41584,
+                                   "output_tokens":  3125,
+                                   "total_tokens":  44709,
+                                   "estimated_usd":  0.0452505
+                               },
+                     "estimated_total_usd":  0.13431045
+                 },
+                 {
+                     "file":  "artifacts/eval_bonus_first.json",
+                     "identical_copies_not_counted_again":  [
+
+                                                            ],
+                     "sha256":  "14706C30BD8BF93F707BECE7A4E27DD8DA7B314B11786062D5545B89D04C24FC",
+                     "case_count":  10,
+                     "agent":  {
+                                   "calls":  30,
+                                   "input_tokens":  49455,
+                                   "cached_input_tokens":  14592,
+                                   "uncached_input_tokens":  34863,
+                                   "output_tokens":  6399,
+                                   "total_tokens":  55854,
+                                   "estimated_usd":  0.05603715
+                               },
+                     "judge":  {
+                                   "calls":  10,
+                                   "input_tokens":  30991,
+                                   "cached_input_tokens":  0,
+                                   "uncached_input_tokens":  30991,
+                                   "output_tokens":  1427,
+                                   "total_tokens":  32418,
+                                   "estimated_usd":  0.02966475
+                               },
+                     "estimated_total_usd":  0.08570190
+                 },
+                 {
+                     "file":  "eval_after_review.json",
+                     "identical_copies_not_counted_again":  [
+
+                                                            ],
+                     "sha256":  "F29F2D168EB56C6FBCA6ED5947C36AAC9CA36617716C03420FA5FAA2A1C6D1A0",
+                     "case_count":  22,
+                     "agent":  {
+                                   "calls":  50,
+                                   "input_tokens":  54732,
+                                   "cached_input_tokens":  5760,
+                                   "uncached_input_tokens":  48972,
+                                   "output_tokens":  10860,
+                                   "total_tokens":  65592,
+                                   "estimated_usd":  0.086031
+                               },
+                     "judge":  {
+                                   "calls":  22,
+                                   "input_tokens":  36984,
+                                   "cached_input_tokens":  0,
+                                   "uncached_input_tokens":  36984,
+                                   "output_tokens":  2983,
+                                   "total_tokens":  39967,
+                                   "estimated_usd":  0.0411615
+                               },
+                     "estimated_total_usd":  0.1271925
+                 },
+                 {
+                     "file":  "eval_bonus_review.json",
+                     "identical_copies_not_counted_again":  [
+
+                                                            ],
+                     "sha256":  "CD0E0C15F03ABE0CF6D2D16056C63070BC00BFCBBFD56BD18C5D798C26D780A0",
+                     "case_count":  10,
+                     "agent":  {
+                                   "calls":  28,
+                                   "input_tokens":  54772,
+                                   "cached_input_tokens":  30592,
+                                   "uncached_input_tokens":  24180,
+                                   "output_tokens":  6533,
+                                   "total_tokens":  61305,
+                                   "estimated_usd":  0.0498279
+                               },
+                     "judge":  {
+                                   "calls":  10,
+                                   "input_tokens":  29982,
+                                   "cached_input_tokens":  0,
+                                   "uncached_input_tokens":  29982,
+                                   "output_tokens":  1349,
+                                   "total_tokens":  31331,
+                                   "estimated_usd":  0.028557
+                               },
+                     "estimated_total_usd":  0.0783849
+                 },
+                 {
+                     "file":  "eval_gate_H1.json",
+                     "identical_copies_not_counted_again":  [
+
+                                                            ],
+                     "sha256":  "7E864B0BAFA9136E9D3DE209448162992D42099D3344362293BAAEFF0AEC8779",
+                     "case_count":  1,
+                     "agent":  {
+                                   "calls":  4,
+                                   "input_tokens":  7661,
+                                   "cached_input_tokens":  3584,
+                                   "uncached_input_tokens":  4077,
+                                   "output_tokens":  1754,
+                                   "total_tokens":  9415,
+                                   "estimated_usd":  0.01121955
+                               },
+                     "judge":  {
+                                   "calls":  1,
+                                   "input_tokens":  2747,
+                                   "cached_input_tokens":  0,
+                                   "uncached_input_tokens":  2747,
+                                   "output_tokens":  161,
+                                   "total_tokens":  2908,
+                                   "estimated_usd":  0.00278475
+                               },
+                     "estimated_total_usd":  0.01400430
+                 },
+                 {
+                     "file":  "eval_gate_H2.json",
+                     "identical_copies_not_counted_again":  [
+
+                                                            ],
+                     "sha256":  "78CD0B0F947C926D1AE75D36AE49AEA0F0A5AF63C803B7D2BCEF1039AD3A392F",
+                     "case_count":  1,
+                     "agent":  {
+                                   "calls":  4,
+                                   "input_tokens":  5769,
+                                   "cached_input_tokens":  2688,
+                                   "uncached_input_tokens":  3081,
+                                   "output_tokens":  629,
+                                   "total_tokens":  6398,
+                                   "estimated_usd":  0.00534285
+                               },
+                     "judge":  {
+                                   "calls":  1,
+                                   "input_tokens":  1729,
+                                   "cached_input_tokens":  0,
+                                   "uncached_input_tokens":  1729,
+                                   "output_tokens":  111,
+                                   "total_tokens":  1840,
+                                   "estimated_usd":  0.00179625
+                               },
+                     "estimated_total_usd":  0.00713910
+                 },
+                 {
+                     "file":  "eval_gate_H6.json",
+                     "identical_copies_not_counted_again":  [
+
+                                                            ],
+                     "sha256":  "62A171E2C17C172FC3E7F815F685BFE62393974D96003B20DB214D450378412B",
+                     "case_count":  1,
+                     "agent":  {
+                                   "calls":  4,
+                                   "input_tokens":  7995,
+                                   "cached_input_tokens":  3968,
+                                   "uncached_input_tokens":  4027,
+                                   "output_tokens":  1260,
+                                   "total_tokens":  9255,
+                                   "estimated_usd":  0.00898785
+                               },
+                     "judge":  {
+                                   "calls":  1,
+                                   "input_tokens":  3734,
+                                   "cached_input_tokens":  0,
+                                   "uncached_input_tokens":  3734,
+                                   "output_tokens":  182,
+                                   "total_tokens":  3916,
+                                   "estimated_usd":  0.0036195
+                               },
+                     "estimated_total_usd":  0.01260735
+                 },
+                 {
+                     "file":  "eval_gate_B6.json",
+                     "identical_copies_not_counted_again":  [
+
+                                                            ],
+                     "sha256":  "9A6ADB8C996597D333DC30B3DCE3F624D72E4200FE926C0F9E1B7D5620F81B59",
+                     "case_count":  1,
+                     "agent":  {
+                                   "calls":  3,
+                                   "input_tokens":  7234,
+                                   "cached_input_tokens":  3584,
+                                   "uncached_input_tokens":  3650,
+                                   "output_tokens":  631,
+                                   "total_tokens":  7865,
+                                   "estimated_usd":  0.0058458
+                               },
+                     "judge":  {
+                                   "calls":  1,
+                                   "input_tokens":  7227,
+                                   "cached_input_tokens":  0,
+                                   "uncached_input_tokens":  7227,
+                                   "output_tokens":  130,
+                                   "total_tokens":  7357,
+                                   "estimated_usd":  0.00600525
+                               },
+                     "estimated_total_usd":  0.01185105
+                 },
+                 {
+                     "file":  "eval_after.json",
+                     "identical_copies_not_counted_again":  [
+                                                                "eval_after_final.json"
+                                                            ],
+                     "sha256":  "C5CF4491FBC50CDFFDE9CBA72FA97F713196442BF88A1C31AB0AE4C34475E9F8",
+                     "case_count":  22,
+                     "agent":  {
+                                   "calls":  59,
+                                   "input_tokens":  80920,
+                                   "cached_input_tokens":  21888,
+                                   "uncached_input_tokens":  59032,
+                                   "output_tokens":  12585,
+                                   "total_tokens":  93505,
+                                   "estimated_usd":  0.1025481
+                               },
+                     "judge":  {
+                                   "calls":  22,
+                                   "input_tokens":  45505,
+                                   "cached_input_tokens":  0,
+                                   "uncached_input_tokens":  45505,
+                                   "output_tokens":  3147,
+                                   "total_tokens":  48652,
+                                   "estimated_usd":  0.04829025
+                               },
+                     "estimated_total_usd":  0.15083835
+                 },
+                 {
+                     "file":  "eval_bonus.json",
+                     "identical_copies_not_counted_again":  [
+                                                                "eval_bonus_final.json"
+                                                            ],
+                     "sha256":  "5F56D5F258BECEB37C579CE45C58640BD9B8094A51CCBDA0012E6377397058DC",
+                     "case_count":  10,
+                     "agent":  {
+                                   "calls":  30,
+                                   "input_tokens":  65381,
+                                   "cached_input_tokens":  44800,
+                                   "uncached_input_tokens":  20581,
+                                   "output_tokens":  6736,
+                                   "total_tokens":  72117,
+                                   "estimated_usd":  0.04910775
+                               },
+                     "judge":  {
+                                   "calls":  10,
+                                   "input_tokens":  31465,
+                                   "cached_input_tokens":  0,
+                                   "uncached_input_tokens":  31465,
+                                   "output_tokens":  1387,
+                                   "total_tokens":  32852,
+                                   "estimated_usd":  0.02984025
+                               },
+                     "estimated_total_usd":  0.07894800
+                 }
+             ],
+    "estimated_total_usd":  0.84244320,
+    "recorded_total_tokens":  806558,
+    "user_reported_usage":  {
+                                "reported_on":  "2026-11-11",
+                                "source":  "User text reporting OpenAI Usage; not independently verified.",
+                                "before_final":  {
+                                                     "amount_usd":  2.12,
+                                                     "total_tokens":  610753
+                                                 },
+                                "after_final":  {
+                                                    "amount_usd":  2.36,
+                                                    "total_tokens":  882037
+                                                },
+                                "displayed_increase":  {
+                                                           "amount_usd":  0.24,
+                                                           "total_tokens":  271284
+                                                       },
+                                "recorded_final_runs":  {
+                                                            "estimated_usd":  0.22978635,
+                                                            "total_tokens":  247126
+                                                        },
+                                "includes_legacy_model_runs":  true,
+                                "usage_date_range":  null,
+                                "project_scope":  null,
+                                "reconciliation_status":  "Scope not fully established. Displayed amounts are rounded account/dashboard totals. Final run files record 24,158 fewer tokens than the displayed increase; do not force equality or allocate the dashboard total by model/run."
+                            }
+}
