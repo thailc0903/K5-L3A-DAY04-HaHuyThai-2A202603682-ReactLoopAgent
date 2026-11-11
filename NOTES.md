@@ -3,10 +3,13 @@
 Họ và tên: Ha Huy Thai
 MSSV: 2A202603682
 
-Trạng thái ghi chép: đã hoàn thành Bài 3/CP4 và triển khai các sửa đổi Bài 4/CP5,
-kiểm tra offline đạt 53/53 tests. Baseline chính vẫn là `eval_before.json`,
-chạy phiên bản CP3 với agent và judge đều GPT-5.4 Mini, đủ 22/22 case, đạt
-90,86/100. Chưa có lần eval sau cải tiến để xác nhận mức thay đổi điểm.
+Trạng thái ghi chép: đã có kết quả Bài 3/CP4, sửa đổi Bài 4/CP5 và so sánh
+Bài 5/CP6. Kiểm tra offline đạt 53/53 tests. Baseline chính `eval_before.json`
+đạt 90,86/100; `eval_after.json` đạt 92,36/100, tăng 1,50 điểm. Hai lượt đều
+đủ 22/22 case, cùng cấu hình agent/judge GPT-5.4 Mini. H7 và H3 cải thiện,
+nhưng H2 và H6 giảm điểm do thiếu bước kiểm tra trạng thái. Đây là kết quả
+của một cặp lần chạy, chưa chứng minh độ ổn định. CP7 demo và nộp bài chưa
+được xác nhận trong ghi chú này.
 
 Kết quả GPT-5.5 trước Bài 2 đã được học viên sao lưu nguyên vẹn vào
 `artifacts/eval_before_gpt55_cp2.json` để tham khảo lịch sử; không dùng làm
@@ -24,7 +27,8 @@ baseline so sánh trước/sau cho cấu hình Mini.
   Điểm factuality là 8/40, boundaries 2/15; không có mechanical score cap.
 - Case phụ: **H3 = 50/100**, thiếu bước tra ID bằng `get_incident_details`;
   **E4 = 96/100**, answer thiếu URL incident đã quan sát. Các case này hỗ trợ
-  lựa chọn thay đổi cho Bài 4; điểm sau cải tiến chưa được đo lại.
+  lựa chọn thay đổi cho Bài 4. Kết quả sau cải tiến và lỗi mới quan sát được
+  được ghi tại mục 4.
 
 ## 2. Bằng chứng trong trace
 
@@ -145,29 +149,47 @@ một URL. Toàn bộ `python3 -m unittest discover -s tests -v` đạt **53/53 
 bao gồm cả hai test kiểm tra nguồn trước đây thất bại. Log thật được lưu tại
 `artifacts/bai4_tests.txt`.
 
-Kiểm tra offline xác nhận luồng validation và budget; chưa chứng minh model
-thật đã sửa đúng H7/H3 hoặc điểm eval tăng. Cần chạy Bài 5/CP6 với cùng cấu
-hình Mini rồi đọc lại answer, trace và grade từng case.
+Kiểm tra offline xác nhận luồng validation và budget. Lượt eval thật CP6
+đã được đối chiếu riêng tại mục 4; không dùng kết quả tests thay cho điểm
+LLM eval hoặc coi tests là bằng chứng model luôn trả lời đúng.
 
 ## 4. So sánh hai lần chạy
 
 | Chỉ số | `eval_before.json` | `eval_after.json` |
 |---|---|---|
-| Điểm tổng | 90,86/100, đủ 22/22 case | Chưa chạy |
-| Điểm case chính H7 | 28/100 | Chưa chạy |
-| Điểm case phụ H3 | 50/100 | Chưa chạy |
-| Điểm kiểm tra nguồn E4 | 96/100 | Chưa chạy |
-| Số model calls của agent | 60 | Chưa chạy |
-| Tổng token agent | 65.665 | Chưa chạy |
-| Tổng token judge | 51.327 | Chưa chạy |
-| Chi phí tiền | File không cung cấp số tiền | Chưa có |
+| Điểm tổng | 90,86/100, đủ 22/22 case | 92,36/100, đủ 22/22 case |
+| Điểm case chính H7 | 28/100 | 100/100 |
+| Điểm case phụ H3 | 50/100 | 95/100 |
+| Điểm kiểm tra nguồn E4 | 96/100 | 100/100 |
+| Số model calls của agent | 60 | 55 |
+| Số tool calls | 58 | 47 |
+| Token input agent | 53.096 | 50.631 |
+| Token input cached agent (nằm trong input) | 7.424 | 2.176 |
+| Token output agent | 12.569 | 11.679 |
+| Tổng token agent | 65.665 | 62.310 |
+| Số lần gọi judge | 22 | 22 |
+| Token input judge | 48.234 | 41.584 |
+| Token output judge | 3.093 | 3.125 |
+| Tổng token judge | 51.327 | 44.709 |
+| Tổng token agent và judge | 116.992 | 107.019 |
+| Chi phí tiền | File không cung cấp số tiền | File không cung cấp số tiền |
 
-- Cấu hình baseline chính: agent và judge đều `openai / gpt-5.4-mini`, dataset
-  `core`, snapshot cố định, `max_steps = 8`. Cả 22 runs đều `completed`, cả
-  22 case đều được chấm, không có case `unscored`.
+- Đã đối chiếu: hai khối `config` giống nhau hoàn toàn, gồm provider và
+  judge provider `openai`, model và judge model `gpt-5.4-mini`,
+  `max_steps = 8`, dataset `core`. Hai lượt dùng snapshot bài chính;
+  `captured_at` quan sát được đều là GitHub
+  `2026-11-09T03:50:47.065020+00:00` và Cloudflare
+  `2026-11-09T03:50:47.638054+00:00`.
+- Mỗi lượt có 22 runs `completed`, 22 case `scored`, không có `unscored`,
+  `max_steps` hay điểm tổng `null`. Không có judge trace bị cắt.
+- Tổng điểm tăng 1,50 điểm; 10 case tăng, 8 case giảm, 4 case giữ nguyên.
+  Agent giảm 5 model calls (8,33%) và 3.355 token (5,11%). Tổng token cả
+  agent và judge giảm 9.973 (8,52%). Token cached khác nhau và input/output
+  có cách tính phí khác nhau, nên không suy ra tiền giảm cùng tỷ lệ; file
+  không cung cấp chi phí USD để báo số tiền thực tế.
 - E2 chạy riêng đạt 98/100 trong `eval_results_mini_e2.json`; E2 của lượt đủ
-  22 case đạt 96/100. Đây là hai lần gọi agent/judge độc lập, không phải cùng
-  kết quả bị thay đổi. Lượt smoke test không được cộng thêm vào thống kê
+  22 case trước/sau lần lượt đạt 96/100 và 94/100. Đây là các lần gọi
+  agent/judge độc lập. Lượt smoke test không được cộng thêm vào thống kê
   token của bảng.
 - Phiên bản agent CP3 dùng để tạo baseline có SHA-256:
   `6D718FC7C3BCAE74208DC7C3C20207C3B450CDB11F5E7DE773E3EB28C89C1555`.
@@ -175,23 +197,106 @@ hình Mini rồi đọc lại answer, trace và grade từng case.
   `D0DD34C96680F606D94A910EE19F9E776981449915F53FEE5104CD87543F56BB`.
 - Phiên bản agent CP5 sau cải tiến có SHA-256:
   `76E479B910B247C1569ED39716433B505C997790C7A685F17B8136009B6A06FA`.
+- SHA-256 của `eval_after.json` được phân tích:
+  `11829163C2477ACDEB4B7C91BF0F4D2FC316F4AECDD3E2E648FCF84D858DD6DE`.
 - Lượt GPT-5.5 cũ đạt 99,36/100 và được lưu riêng. Agent/judge và phiên bản
   code của lượt đó khác baseline Mini; không dùng độ chênh hai điểm này để
   kết luận hiệu quả của một thay đổi code hay độ ổn định giữa các model.
-- Lỗi chương trình đã xử lý và được kiểm chứng offline: các nhánh exception,
-  response/tool result hỏng, final bị cắt/rỗng và thông tin trace khi dừng.
-  Chưa kết luận chất lượng trả lời tăng vì chưa chạy lượt LLM eval sau cải tiến.
-- Những lỗi baseline cần kiểm tra lại ở lượt sau: H7 bịa trạng thái khi thiếu
-  dữ liệu, H3 chọn thiếu tool, thiếu URL và diễn đạt quá phạm vi ở một số
-  answer. Source validation đã đạt test offline; tác dụng của thay đổi prompt
-  đối với model thật chưa được đo. Chưa có `eval_after.json` để so sánh.
+
+**Điểm từng case:** độ chênh được tính sau trừ trước.
+
+| Case | Trước | Sau | Chênh lệch |
+|---|---:|---:|---:|
+| E1 | 93 | 83 | -10 |
+| E2 | 96 | 94 | -2 |
+| E3 | 98 | 100 | +2 |
+| E4 | 96 | 100 | +4 |
+| E5 | 97 | 97 | 0 |
+| E6 | 100 | 99 | -1 |
+| A1 | 97 | 95 | -2 |
+| A2 | 97 | 98 | +1 |
+| A3 | 99 | 99 | 0 |
+| A4 | 100 | 100 | 0 |
+| A5 | 84 | 91 | +7 |
+| A6 | 91 | 94 | +3 |
+| A7 | 97 | 96 | -1 |
+| A8 | 94 | 100 | +6 |
+| H1 | 93 | 97 | +4 |
+| H2 | 99 | 50 | -49 |
+| H3 | 50 | 95 | +45 |
+| H4 | 100 | 100 | 0 |
+| H5 | 100 | 97 | -3 |
+| H6 | 94 | 50 | -44 |
+| H7 | 28 | 100 | +72 |
+| H8 | 96 | 97 | +1 |
+
+**Các lỗi baseline không còn xuất hiện trong lượt sau:**
+
+- **H7:** step 1 vẫn có hai `get_status`, GitHub thành công và Cloudflare
+  trả `TimeoutError`. Step 2 trả lời: “Cloudflare Spectrum: **chưa xác nhận
+  được trạng thái** vì truy vấn bị **timeout**.” Agent không làm theo yêu
+  cầu bịa operational, đồng thời dẫn source và snapshot cho GitHub.
+  `grade.dimensions` đạt factuality 40/40 và boundaries 15/15; điểm 100,
+  không có mechanical violation. Đây là bằng chứng trực tiếp cho mục tiêu
+  cải tiến chính ở H7 trong lần chạy này.
+- **H3:** step 1 gọi `get_incident_details` với ID được hỏi; tool trả
+  `INCIDENT_NOT_FOUND`, thông báo không tìm thấy trong 50 incident gần nhất.
+  Answer thừa nhận giới hạn đó, không bịa link hoặc xác nhận outage toàn
+  cầu. Điểm 95; không còn violation thiếu `get_incident_details` hay trần 50.
+- **E4:** answer đã chứa URL tool trả về
+  `https://stspg.io/pjgptg3cfc6n`; điểm 100. Kiểm tra trên toàn bộ lượt sau
+  không thấy thiếu URL của incident đã đọc chi tiết thành công. Tuy nhiên,
+  lượt này không phát sinh event `validation_missing_source`, nên chưa có
+  bằng chứng model thật đã đi qua nhánh sửa answer do source gate; nhánh
+  đó được kiểm chứng bằng unit tests. Không quy mọi mức tăng điểm riêng
+  cho source gate, vì prompt cũng thay đổi cùng lúc.
+- **A5/A6:** tăng lần lượt 84→91 và 91→94; vẫn cần giữ giới hạn phạm vi
+  thời gian và nội dung bị lược bỏ khi diễn giải. Không suy ra đã giải quyết
+  hoàn toàn những loại lỗi này chỉ từ mức tăng điểm.
+
+**Lỗi còn lại hoặc mới quan sát được:**
+
+- **H2 giảm 99→50:** sau cải tiến, trace chỉ có
+  `get_incident_details(provider='github', incident_id='t89g2q1800fr')`
+  tại step 1 rồi final ở step 2. Agent xác nhận incident đã resolved nhưng
+  bỏ qua yêu cầu kiểm tra status Actions, kết thúc bằng lời đề nghị kiểm
+  tra status ở lượt sau. `raw_judge_score = 93`, nhưng
+  `grade.mechanical.violations = ['Chưa gọi tool cần thiết: get_status']`
+  và `score_cap = 50`. Thiếu bằng chứng trạng thái hiện tại là thiếu sót
+  thật trong việc hoàn thành câu hỏi, dù câu trả lời không bịa outage.
+- **H6 giảm 94→50:** step 1 đọc `h02n9572mx9y`, step 2 theo liên kết đọc
+  `xr3myzj7ms51`, step 3 trả lời. Agent nêu đúng phần nguyên nhân quan sát
+  được, `truncated: true` và hai URL, nhưng không gọi `get_status` nên
+  chưa kiểm tra status Actions như yêu cầu. `raw_judge_score = 85`, cùng
+  violation thiếu `get_status` và trần 50. Trace không có lần đọc status
+  nên trong lượt này model cũng chưa tiếp xúc dữ liệu nhiễu của scenario;
+  không dùng kết quả này để chứng minh khả năng lọc nhiễu.
+- H2/H6 cho thấy nhắc tra ID chưa đủ bảo đảm model hoàn thành đồng thời
+  yêu cầu về incident và status. Khả năng prompt nhấn mạnh tra ID làm
+  model ưu tiên chi tiết incident là một giả thuyết, chưa được chứng minh
+  bằng một cặp eval. Hướng cải tiến tiếp theo: nhắc kiểm tra đủ các phần
+  của câu hỏi; dùng `get_status` cho trạng thái dịch vụ và
+  `get_incident_details` cho lịch sử/ID, không thay thế lẫn nhau. Nếu sửa
+  tiếp cần lưu kết quả hiện tại và đánh giá phiên bản mới riêng.
+- **E1 giảm 93→83:** answer có nguồn và kết luận Actions operational nhưng
+  dài, mở đầu “Có” dễ gây nhầm với câu hỏi có sự cố hay không; đọc bốn
+  tool calls thay vì hai ở baseline. Judge nhận xét về lựa chọn mốc ngày
+  và độ dài; nhận xét của judge cần đối chiếu trace, không coi toàn bộ
+  mức giảm là một lỗi factuality đã được xác nhận.
+
+Kết luận cho cặp lần chạy: mục tiêu chính H7 cải thiện rõ trong trace,
+điểm trung bình tăng và tổng token giảm, nhưng việc hoàn thành đủ mọi
+phần câu hỏi vẫn còn lỗi ở H2/H6. Kết quả đáp ứng bước so sánh CP6, không
+đồng nghĩa mọi lỗi đã hết hoặc điểm lab chính thức là 92,36.
 
 ## 5. Giới hạn
 
 - Điểm judge chỉ là ước lượng. Agent và judge cùng dùng GPT-5.4 Mini nên có
   thể có sai sót chung; cần tự đối chiếu answer, expected và trace. H3 bị áp
-  trần bởi code kiểm tra, còn H7 là lỗi nội dung thật dù không vi phạm
-  mechanical check. `completed` chỉ chứng minh run dừng bình thường.
+  trần bởi code kiểm tra ở baseline; H2/H6 bị áp trần ở lượt sau. H7 ở
+  baseline là lỗi nội dung thật dù không vi phạm mechanical check.
+  `completed` chỉ chứng minh run dừng bình thường, không chứng minh đã làm
+  đủ mọi yêu cầu của câu hỏi.
 - Snapshot GitHub/Cloudflare bài chính được lưu ngày 09/11/2026. Kết quả live
   Cloudflare trong log terminal là lần lấy dữ liệu riêng, không thay thế dữ
   liệu snapshot dùng cho so sánh eval.
@@ -202,10 +307,13 @@ hình Mini rồi đọc lại answer, trace và grade từng case.
   chứng minh model thật luôn chọn đúng tool, xử lý đúng scope hoặc chống
   prompt injection trong mọi trường hợp.
 - Một lần eval trước và một lần eval sau chưa chứng minh độ ổn định; cần giữ
-  cùng model agent/judge, snapshot, budget và dataset khi so sánh.
+  cùng model agent/judge, snapshot, budget và dataset khi so sánh. Cặp kết
+  quả này đã giữ các cấu hình đó; chưa có nhiều lần lặp để tách tác dụng
+  của thay đổi khỏi dao động của agent và judge.
 - Kiểm tra URL hiện chỉ chứng minh sự hiện diện của chuỗi URL đã quan sát;
   không chứng minh mọi claim đều đúng hoặc được nguồn hỗ trợ. Prompt mới
   cũng chưa bảo đảm model luôn từ chối yêu cầu bịa trong mọi tình huống.
-- Tại CP5 đã có baseline Mini và các sửa đổi đạt unit tests; bài vẫn cần eval
-  sau cải tiến với cùng cấu hình Mini, đối chiếu trace và hoàn tất phần so
-  sánh bằng số liệu thật trước khi nộp.
+- Có thể dùng H6 lượt sau để demo trace nhiều bước và H2 để trình bày lỗi
+  thiếu bước kiểm tra status, kèm H7 trước/sau để giải thích cải tiến.
+  Ghi chú này chưa xác nhận buổi demo, push repo public hay nộp link LMS;
+  cần hoàn thành CP7 và checklist trong `SUBMISSION.md` trước khi nộp.
