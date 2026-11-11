@@ -8,8 +8,9 @@ Bài 5/CP6. Kiểm tra offline đạt 53/53 tests. Baseline chính `eval_before.
 đạt 90,86/100; `eval_after.json` đạt 92,36/100, tăng 1,50 điểm. Hai lượt đều
 đủ 22/22 case, cùng cấu hình agent/judge GPT-5.4 Mini. H7 và H3 cải thiện,
 nhưng H2 và H6 giảm điểm do thiếu bước kiểm tra trạng thái. Đây là kết quả
-của một cặp lần chạy, chưa chứng minh độ ổn định. CP7 demo và nộp bài chưa
-được xác nhận trong ghi chú này.
+của một cặp lần chạy, chưa chứng minh độ ổn định. Tài liệu chuẩn bị demo và
+checklist CP7 nằm trong [DEMO.md](DEMO.md); buổi trình bày và nộp LMS cần
+được học viên xác nhận.
 
 Kết quả GPT-5.5 trước Bài 2 đã được học viên sao lưu nguyên vẹn vào
 `artifacts/eval_before_gpt55_cp2.json` để tham khảo lịch sử; không dùng làm
@@ -313,7 +314,9 @@ phần câu hỏi vẫn còn lỗi ở H2/H6. Kết quả đáp ứng bước so
 - Kiểm tra URL hiện chỉ chứng minh sự hiện diện của chuỗi URL đã quan sát;
   không chứng minh mọi claim đều đúng hoặc được nguồn hỗ trợ. Prompt mới
   cũng chưa bảo đảm model luôn từ chối yêu cầu bịa trong mọi tình huống.
-- Có thể dùng H6 lượt sau để demo trace nhiều bước và H2 để trình bày lỗi
-  thiếu bước kiểm tra status, kèm H7 trước/sau để giải thích cải tiến.
-  Ghi chú này chưa xác nhận buổi demo, push repo public hay nộp link LMS;
-  cần hoàn thành CP7 và checklist trong `SUBMISSION.md` trước khi nộp.
+- Tài liệu chuẩn bị CP7 tại [DEMO.md](DEMO.md) dùng H1 lượt sau để demo
+  trace nhiều bước thành công, H2 để trình bày lỗi thiếu kiểm tra status,
+  và H7 trước/sau để giải thích cải tiến. Repo đã được xác nhận public,
+  truy cập không đăng nhập trả HTTP 200; bản CP6 trên GitHub khớp commit
+  local `d95414f0657283247bea4262b045a623ce13b296`. Tài liệu chuẩn bị
+  không thay thế buổi trình bày hoặc xác nhận đã nộp link LMS.
