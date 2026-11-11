@@ -108,6 +108,11 @@ Chất lượng bằng chứng cải thiện với chi phí cao hơn baseline.
 - **H3:** đã tra ID bằng detail, nhận INCIDENT_NOT_FOUND và nêu giới hạn tìm kiếm; không bịa link.
 - **E4:** final có URL đã quan sát. Nhánh sửa nguồn được LLM thật sử dụng trong `eval_gate_H1.json`: step 3 thiếu URL, step 4 sửa đủ nguồn.
 - **H2/H6:** trong `eval_after.json`, step 2 phát sinh `validation_incomplete_evidence`; step 3 bổ sung status/incident liên kết, step 4 kết luận. Không còn vi phạm thiếu tool của lượt review.
+**Lỗi còn lại hoặc mới xuất hiện:**
+
+- H7/H6 dùng bộ lọc “GitHub Actions” trả components rỗng: overall không xác nhận riêng Actions. H6 final chưa báo rõ status dù judge nhận xét đã có; A6 mở đầu “Có” dễ gây nhầm và giảm 91 → 85.
+- B6 final nói 2 tool calls nhưng trace có 4. Gate đã buộc đọc detail, chưa kiểm chứng mọi con số trong final; judge 83 cũng bỏ sót lỗi đếm này.
+
 
 | Nhóm đối chiếu trong GUIDE | Bằng chứng ở lượt sau |
 |---|---|
@@ -138,20 +143,9 @@ Hai file final lưu **247.126 token**, ước tính **0,22978635 USD**.
 Tổng Usage có model cũ; khoảng ngày/project chưa xác nhận và chênh 24.158 token chưa đối chiếu được,
 nên không phân bổ tổng tiền đó riêng cho Mini hoặc từng lượt eval.
 
-## 5. Giới hạn và lỗi còn lại
-
-**Lỗi còn lại hoặc mới xuất hiện:**
-
-- H7/H6 dùng bộ lọc “GitHub Actions” trả components rỗng: overall không xác nhận riêng Actions. H6 final chưa báo rõ status dù judge nhận xét đã có; A6 mở đầu “Có” dễ gây nhầm và giảm 91 → 85.
-- B6 final nói 2 tool calls nhưng trace có 4. Gate đã buộc đọc detail, chưa kiểm chứng mọi con số trong final; judge 83 cũng bỏ sót lỗi đếm này.
-
-**Giới hạn:**
-
+## 5. Giới hạn 
 - Agent/judge cùng model, mỗi phiên bản một lượt không chứng minh độ ổn định. Điểm eval khác điểm lab; judge có thể bỏ sót lỗi.
 - Snapshot không phải status live. Core chỉ tìm trong 50 incident, trả tối đa 5 mục; detail giữ một phần updates và có thể truncated. Danh sách rỗng không chứng minh không có sự cố.
 - Source validation chỉ kiểm tra URL hiện diện; coverage gate không bảo đảm mọi claim đúng, bộ lọc component đúng hoặc final trình bày đủ dữ liệu đã đọc.
 - Lỗi 429/định dạng trong eval là giả lập; tests offline không chứng minh đã kiểm tra retry trên API live. B5 call đầu đã dùng integer nhưng scenario vẫn trả INVALID_ARGUMENTS.
 - Chi phí tính từ token là ước tính theo giá Standard; Usage trên dashboard là số tổng hợp, chưa tách theo project/ngày.
-
-**Demo và nộp:** dùng H1 bản cuối cho trace nhiều bước; H7 baseline/bản cuối cho lỗi và cải tiến.
-**CP7:** giải thích code, demo, commit/push và nộp link repo public đúng hạn lên LMS.
