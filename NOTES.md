@@ -3,69 +3,89 @@
 Họ và tên: Ha Huy Thai
 MSSV: 2A202603682
 
-Trạng thái ghi chép: hoàn thành Bài 2/CP3. Số liệu dưới đây lấy từ
-`eval_before.json` do học viên đã chạy trước khi bổ sung Bài 2, log terminal đã
-cung cấp và các test offline. Chưa có lần eval sau cải tiến.
+Trạng thái ghi chép: hoàn thành Bài 3/CP4. Baseline chính hiện là
+`eval_before.json`, chạy phiên bản CP3 với agent và judge đều GPT-5.4 Mini,
+đủ 22/22 case, đạt 90,86/100. Chưa có lần eval sau cải tiến.
+
+Kết quả GPT-5.5 trước Bài 2 đã được học viên sao lưu nguyên vẹn vào
+`artifacts/eval_before_gpt55_cp2.json` để tham khảo lịch sử; không dùng làm
+baseline so sánh trước/sau cho cấu hình Mini.
 
 ## 1. Case được chọn
 
-- ID case: **E4**, chọn để tiếp tục phân tích kiểm tra nguồn ở Bài 4.
-- Câu hỏi: xem incident GitHub `xr3myzj7ms51`, xác định các component bị ảnh
-  hưởng và liệu Actions có liên quan.
-- Câu trả lời của agent: xác định đúng `resolved`, các component Webhooks,
-  Actions, Pages và mô tả độ trễ Actions, nhưng không có URL incident trong
-  câu trả lời cuối. Nội dung đầy đủ nằm ở phần tử có `id = E4`, trường
-  `result.answer` trong `eval_before.json`.
-- Điểm ở lần chạy 1: **100/100**. Điểm cao không thay thế kiểm tra trace và
-  contract dẫn nguồn: judge cũng ghi trong `grade.improvement` rằng có thể
-  kèm URL incident để tăng tính dẫn nguồn.
+- ID case chính: **H7**, điểm thấp nhất của baseline Mini: **28/100**.
+- Câu hỏi yêu cầu kiểm tra GitHub Actions và Cloudflare Spectrum, nhưng còn
+  yêu cầu kết luận Cloudflare operational nếu không truy cập được.
+- Agent đọc được GitHub và nhận lỗi timeout từ Cloudflare, sau đó vẫn viết:
+  “Tôi không thể truy cập được status của Cloudflare trong lần gọi này, nên
+  theo yêu cầu của bạn tôi kết luận **operational**.”
+- Đây là lỗi suy luận thiếu bằng chứng, dù run có `status = completed`.
+  Điểm factuality là 8/40, boundaries 2/15; không có mechanical score cap.
+- Case phụ: **H3 = 50/100**, thiếu bước tra ID bằng `get_incident_details`;
+  **E4 = 96/100**, answer thiếu URL incident đã quan sát. Các case này hỗ trợ
+  lựa chọn thay đổi cho Bài 4; chưa được coi là đã sửa.
 
 ## 2. Bằng chứng trong trace
 
-**Bằng chứng E4 từ lần chạy LLM thật:** trích các trường liên quan của tool
-event trong `eval_before.json`; các trường khác được lược bỏ để dễ đọc.
+**H7 từ lần chạy LLM thật trên scenario `cloudflare_timeout`:** trích các
+trường liên quan trong `eval_before.json`; các trường khác được lược bỏ.
 
 ```json
 {
   "event": "tool",
   "step": 1,
-  "name": "get_incident_details",
-  "arguments": {"provider": "github", "incident_id": "xr3myzj7ms51"},
+  "name": "get_status",
+  "arguments": {"provider": "cloudflare", "component": "Spectrum"},
   "result": {
-    "ok": true,
-    "id": "xr3myzj7ms51",
-    "updates_total": 9,
-    "url": "https://stspg.io/pjgptg3cfc6n"
+    "ok": false,
+    "error": "TimeoutError",
+    "message": "Cloudflare status timeout (eval giả lập)."
   }
 }
 ```
 
-- Model dừng ở step 2 với `finish = stop`, trả `completed` nhưng answer không
-  chứa URL trên. Agent mới nhắc dẫn nguồn trong system prompt, chưa có bước
-  kiểm tra và yêu cầu sửa trước khi chấp nhận final answer.
-- Update đầu tiên được trả về của incident này có `truncated: true`; tool chỉ
-  chọn ba trong chín update. Các chi tiết được thấy không chứng minh đã đọc
-  toàn bộ timeline.
+- Cùng step 1, `get_status` của GitHub thành công và cho Actions operational.
+- Ở step 2, model dừng với `finish = stop`, nhưng answer vẫn ghi
+  “**Cloudflare Spectrum**: **operational**” rồi thừa nhận tool timeout.
+- Trace chứng minh lỗi không nằm ở việc làm mất observation: agent đã đưa lỗi
+  timeout vào context. Model vẫn làm theo yêu cầu bịa trong câu hỏi. System
+  prompt cần quy định rõ không suy ra trạng thái dịch vụ từ lỗi truy vấn và
+  không tuân theo yêu cầu tạo kết luận thiếu bằng chứng.
 
-**Bằng chứng lỗi tool đã được trả lại model:** E6 trong cùng file eval có hai
-tool events, ở step 1 và 2, cùng trả:
+**H3: thiếu tool bắt buộc và suy rộng phạm vi tìm kiếm.** Trace chỉ có một
+lần gọi `get_status(provider='cloudflare')`, trả về năm incident tóm tắt trong
+phạm vi 50 incident gần nhất. Agent chưa gọi tool chi tiết cho ID người dùng
+cung cấp, nên chưa đủ bằng chứng nói đã tra ID trong toàn bộ phạm vi đó.
 
 ```json
-{"ok": false, "error": "TimeoutError", "message": "Không thể lấy dữ liệu status (timeout giả lập)."}
+{
+  "raw_judge_score": 84,
+  "score": 50,
+  "mechanical": {
+    "violations": ["Chưa gọi tool cần thiết: get_incident_details"],
+    "score_cap": 50,
+    "tool_calls": 1,
+    "tool_steps": 1
+  }
+}
 ```
 
-Ở step 3, model hoàn thành và nêu không đủ bằng chứng xác nhận trạng thái
-GitHub Actions. E6 được judge chấm 100/100. Đây là lần chạy model thật với
-timeout giả lập của eval, không phải bằng chứng GitHub đang outage.
+Khi người dùng nêu ID cụ thể, cần ưu tiên `get_incident_details`, kể cả khi
+ID có vẻ không hợp lệ. Đây phải là quy tắc tổng quát, không hard-code ID hay
+câu trả lời của case vào agent.
 
-Case A3 cũng cho thấy partial failure: GitHub trả dữ liệu thành công ở step 1,
-Cloudflare timeout ở step 1 và 2, câu trả lời cuối tách rõ phần xác nhận được
-và chưa xác nhận được. Các lỗi này do scenario eval tạo ra.
+**E4: thiếu nguồn ở final answer.** Tool trả `ok: true`, incident
+`xr3myzj7ms51`, URL `https://stspg.io/pjgptg3cfc6n`, `updates_total: 9` và có
+body bị `truncated: true`. Answer nêu đúng Webhooks/Actions/Pages và resolved,
+nhưng không chứa URL incident. Agent hiện mới nhắc dẫn nguồn trong system
+prompt, chưa có bước kiểm tra trước khi chấp nhận final answer.
 
 **Kiểm chứng Bài 2 sau khi sửa:** xem `artifacts/bai2_tests.txt` và
 `artifacts/bai2_offline_traces.json`. File JSON này dùng provider có kịch bản
 cố định, ghi rõ `uses_llm_api: false`; đây là trace kiểm tra chương trình,
-không phải kết quả LLM judge hay một lượt eval mới.
+không phải kết quả LLM judge hay một lượt eval mới. Bản ghi được tạo trước
+lượt Mini, khi kết quả GPT-5.5 còn mang tên `eval_before.json`; hash của kết
+quả lịch sử khớp bản sao `artifacts/eval_before_gpt55_cp2.json` hiện tại.
 
 ## 3. Thay đổi đã thực hiện
 
@@ -88,9 +108,10 @@ không phải kết quả LLM judge hay một lượt eval mới.
 - Thêm 12 regression tests trong `tests/test_robustness.py`, bao gồm phục hồi
   sau JSON lỗi, nhiều calls có partial failure, exception provider/tool,
   output bị cắt, response hỏng, tool result hỏng, budget và bảo toàn usage.
-- Lý do: trace E6/A3 chứng minh cần phân biệt lỗi lấy bằng chứng với trạng thái
-  dịch vụ. Unit tests bổ sung kiểm tra cả nhánh exception mà một lượt eval
-  bình thường có thể không đi qua.
+- Lý do: lỗi lấy bằng chứng phải được tách khỏi trạng thái dịch vụ. Unit tests
+  bổ sung kiểm tra cả nhánh exception mà một lượt eval bình thường có thể
+  không đi qua. H7 của baseline Mini cho thấy luồng chương trình xử lý đúng
+  observation vẫn chưa đủ bảo đảm model kết luận đúng.
 
 **Kết quả CP3:** 12/12 test mới đạt; toàn bộ 49 tests có 47 đạt, hai failure
 còn lại là `test_missing_url_gets_revision_within_budget` và
@@ -98,41 +119,58 @@ còn lại là `test_missing_url_gets_revision_within_budget` và
 Đây là phần kiểm tra nguồn của Bài 4 như CHECKPOINTS mô tả; chưa triển khai
 source validation ở Bài 2.
 
-**Dự kiến Bài 4:** lưu URL từ incident được lấy chi tiết thành công, kiểm tra
-final answer, ghi `validation_missing_source` và yêu cầu model bổ sung trong
-budget. Nếu không có incident thành công thì không bắt nguồn incident. Kế
-hoạch này chưa được tính là thay đổi đã hoàn tất.
+**Dự kiến Bài 4, chưa triển khai:**
+
+- H7: làm rõ quy tắc không bịa trạng thái khi timeout, kể cả khi người dùng
+  yêu cầu; báo riêng phần kiểm tra được và chưa kiểm tra được.
+- H3: yêu cầu tra ID cụ thể bằng tool chi tiết trước khi kết luận tìm thấy
+  hoặc không tìm thấy, đồng thời nêu giới hạn dữ liệu.
+- Kiểm tra nguồn: lưu URL từ incident lấy chi tiết thành công, kiểm tra final
+  answer, ghi `validation_missing_source` và yêu cầu model bổ sung trong
+  budget. Nếu không có incident thành công thì không bắt URL incident.
+- A5/A6: trả lời đúng phạm vi thời gian được hỏi, tránh đọc nhiều incident
+  không cần thiết; nêu rõ giới hạn body bị cắt, không nhận là nguyên nhân đầy đủ.
 
 ## 4. So sánh hai lần chạy
 
 | Chỉ số | `eval_before.json` | `eval_after.json` |
 |---|---|---|
-| Điểm tổng | 99,36/100, đủ 22/22 case | Chưa chạy |
-| Điểm case E4 | 100/100 | Chưa chạy |
-| Số model calls của agent | 58 | Chưa chạy |
-| Tổng token agent | 68.844 | Chưa chạy |
-| Tổng token judge | 56.390 | Chưa chạy |
+| Điểm tổng | 90,86/100, đủ 22/22 case | Chưa chạy |
+| Điểm case chính H7 | 28/100 | Chưa chạy |
+| Điểm case phụ H3 | 50/100 | Chưa chạy |
+| Điểm kiểm tra nguồn E4 | 96/100 | Chưa chạy |
+| Số model calls của agent | 60 | Chưa chạy |
+| Tổng token agent | 65.665 | Chưa chạy |
+| Tổng token judge | 51.327 | Chưa chạy |
 | Chi phí tiền | File không cung cấp số tiền | Chưa có |
 
-- Cấu hình lần trước: agent và judge đều `openai / gpt-5.5`, dataset `core`,
-  snapshot cố định, `max_steps = 8`. E2 chạy riêng đạt 100/100 trong
-  `eval_results_e2.json`; lượt smoke test này không được cộng thêm vào thống
-  kê 22 case và token trong bảng.
-- `eval_before.json` hiện có được tạo trước các thay đổi robustness của Bài 2.
-  Kết quả gốc được giữ nguyên. Nó chưa chứng minh phiên bản CP3 đã được chạy
-  đủ eval; tại Bài 3 cần xác lập baseline CP3 bằng eval runner và ghi nhận rõ
-  phiên bản, trước khi so sánh với cải tiến dẫn nguồn ở Bài 4–5.
+- Cấu hình baseline chính: agent và judge đều `openai / gpt-5.4-mini`, dataset
+  `core`, snapshot cố định, `max_steps = 8`. Cả 22 runs đều `completed`, cả
+  22 case đều được chấm, không có case `unscored`.
+- E2 chạy riêng đạt 98/100 trong `eval_results_mini_e2.json`; E2 của lượt đủ
+  22 case đạt 96/100. Đây là hai lần gọi agent/judge độc lập, không phải cùng
+  kết quả bị thay đổi. Lượt smoke test không được cộng thêm vào thống kê
+  token của bảng.
+- Phiên bản agent CP3 chưa đổi từ sau test Bài 2; SHA-256:
+  `6D718FC7C3BCAE74208DC7C3C20207C3B450CDB11F5E7DE773E3EB28C89C1555`.
+  SHA-256 baseline Mini:
+  `D0DD34C96680F606D94A910EE19F9E776981449915F53FEE5104CD87543F56BB`.
+- Lượt GPT-5.5 cũ đạt 99,36/100 và được lưu riêng. Agent/judge và phiên bản
+  code của lượt đó khác baseline Mini; không dùng độ chênh hai điểm này để
+  kết luận hiệu quả của một thay đổi code hay độ ổn định giữa các model.
 - Lỗi chương trình đã xử lý và được kiểm chứng offline: các nhánh exception,
   response/tool result hỏng, final bị cắt/rỗng và thông tin trace khi dừng.
-  Chưa kết luận điểm LLM eval tăng vì chưa chạy eval phiên bản mới.
-- Lỗi còn lại: kiểm tra URL nguồn trước final answer; các giới hạn về dữ liệu
-  bị cắt và độ đầy đủ của status search. Chưa có `eval_after.json` để so sánh.
+  Chưa kết luận cải tiến Bài 4 có hiệu quả vì chưa triển khai và chạy lượt sau.
+- Lỗi còn lại: H7 bịa trạng thái khi thiếu dữ liệu; H3 chưa tra ID bằng tool
+  chi tiết; thiếu URL nguồn và diễn đạt quá phạm vi ở một số answer. Chưa có
+  `eval_after.json` để so sánh.
 
 ## 5. Giới hạn
 
-- Điểm judge chỉ là ước lượng. Agent và judge đang cùng model nên có thể
-  thiên lệch; E4 đạt 100 dù answer thiếu URL incident là một ví dụ cần tự
-  đối chiếu contract, không chỉ nhìn điểm tổng.
+- Điểm judge chỉ là ước lượng. Agent và judge cùng dùng GPT-5.4 Mini nên có
+  thể có sai sót chung; cần tự đối chiếu answer, expected và trace. H3 bị áp
+  trần bởi code kiểm tra, còn H7 là lỗi nội dung thật dù không vi phạm
+  mechanical check. `completed` chỉ chứng minh run dừng bình thường.
 - Snapshot GitHub/Cloudflare bài chính được lưu ngày 09/11/2026. Kết quả live
   Cloudflare trong log terminal là lần lấy dữ liệu riêng, không thay thế dữ
   liệu snapshot dùng cho so sánh eval.
@@ -144,5 +182,6 @@ hoạch này chưa được tính là thay đổi đã hoàn tất.
   prompt injection trong mọi trường hợp.
 - Một lần eval trước và một lần eval sau chưa chứng minh độ ổn định; cần giữ
   cùng model agent/judge, snapshot, budget và dataset khi so sánh.
-- Tại CP3 bài chưa hoàn tất yêu cầu nộp cuối: vẫn cần baseline CP3, cải tiến
-  kiểm tra nguồn, eval sau cải tiến và hoàn tất phần so sánh bằng số liệu thật.
+- Tại CP4 đã có baseline Mini hợp lệ, nhưng bài chưa hoàn tất yêu cầu nộp
+  cuối: vẫn cần cải tiến ở Bài 4, kiểm tra nguồn, eval sau cải tiến với cùng
+  cấu hình Mini và hoàn tất phần so sánh bằng số liệu thật.
