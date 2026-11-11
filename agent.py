@@ -111,7 +111,9 @@ class _RateLimitPolicy:
         state = self.providers.setdefault(target, {'failures': 0, 'not_before': 0, 'blocked': False})
         state['failures'] += 1
         delay = _retry_delay(observation, state['failures'])
-        state['blocked'] = state['failures'] >= self.MAX_FAILURES or delay > self.wait_remaining
+        state['blocked'] = (state['failures'] >= self.MAX_FAILURES
+                            or delay > self.wait_remaining
+                            or observation.get('retriable') is False)
         state['not_before'] = time.monotonic() + delay
         policy = {'failures': state['failures'],
                   'attempts_remaining': max(0, self.MAX_FAILURES - state['failures']),

@@ -1,0 +1,23 @@
+test_429_observation_returns_to_model (test_agent.BonusAgentTests.test_429_observation_returns_to_model) ... ok
+test_bonus_schemas_and_system_prompt (test_agent.BonusAgentTests.test_bonus_schemas_and_system_prompt) ... ok
+test_invalid_arguments_observation_returns_to_model (test_agent.BonusAgentTests.test_invalid_arguments_observation_returns_to_model) ... ok
+test_bonus_source_validation_still_requests_revision (test_policy.BonusPolicyTests.test_bonus_source_validation_still_requests_revision) ... ok
+test_core_tools_keep_original_schemas_and_prompt (test_policy.BonusPolicyTests.test_core_tools_keep_original_schemas_and_prompt) ... ok
+test_explicit_empty_schemas_are_not_replaced_with_core_schemas (test_policy.BonusPolicyTests.test_explicit_empty_schemas_are_not_replaced_with_core_schemas) ... ok
+test_injection_stays_untrusted_data_and_is_not_added_as_an_instruction (test_policy.BonusPolicyTests.test_injection_stays_untrusted_data_and_is_not_added_as_an_instruction) ... ok
+test_live_retry_after_is_waited_before_next_http_request (test_policy.BonusPolicyTests.test_live_retry_after_is_waited_before_next_http_request) ... ok
+test_long_retry_after_stops_without_sleep_or_another_tool_execution (test_policy.BonusPolicyTests.test_long_retry_after_stops_without_sleep_or_another_tool_execution) ... ok
+test_next_page_is_returned_with_original_url_and_update (test_policy.BonusPolicyTests.test_next_page_is_returned_with_original_url_and_update) ... ok
+test_noise_is_omitted_from_model_context_but_preserved_in_trace (test_policy.BonusPolicyTests.test_noise_is_omitted_from_model_context_but_preserved_in_trace) ... ok
+test_non_retriable_429_does_not_allow_another_execution (test_policy.BonusPolicyTests.test_non_retriable_429_does_not_allow_another_execution) ... ok
+test_persistent_rate_limit_blocks_fourth_execution_and_keeps_other_results (test_policy.BonusPolicyTests.test_persistent_rate_limit_blocks_fourth_execution_and_keeps_other_results) ... ok
+test_rate_limit_is_observed_before_any_retry_and_can_end_with_partial_answer (test_policy.BonusPolicyTests.test_rate_limit_is_observed_before_any_retry_and_can_end_with_partial_answer) ... ok
+test_retry_after_supports_http_date_and_bounded_fallback (test_policy.BonusPolicyTests.test_retry_after_supports_http_date_and_bounded_fallback) ... ok
+test_retry_limit_cannot_be_bypassed_by_switching_tool_for_same_provider (test_policy.BonusPolicyTests.test_retry_limit_cannot_be_bypassed_by_switching_tool_for_same_provider) ... ok
+test_simulated_format_error_can_be_fixed_without_hiding_observation (test_policy.BonusPolicyTests.test_simulated_format_error_can_be_fixed_without_hiding_observation) ... ok
+test_wait_budget_is_shared_across_providers (test_policy.BonusPolicyTests.test_wait_budget_is_shared_across_providers) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 0.024s
+
+OK
